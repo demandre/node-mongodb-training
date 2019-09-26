@@ -1,0 +1,23 @@
+{
+  "name": "mongodb-training",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dates.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dates.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/demandre/node-mongodb-training.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/demandre/node-mongodb-training/issues"
+  },
+  "homepage": "https://github.com/demandre/node-mongodb-training#readme",
+  "dependencies": {
+    "mongodb": "^3.3.2"
+  }
+}
