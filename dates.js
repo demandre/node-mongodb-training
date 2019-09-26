@@ -1,39 +1,16 @@
 const url = "mongodb://localhost:27017";
-const dbName = 'training';
+const dbName = 'chat-bot';
 const MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url);
+
 const express = require('express');
 const bodyParser = require('body-parser');
-
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
 const app = express();
-
 app.use(bodyParser.json());
 
-app.post('/chat', function (req, res) {
-    let msg = req.body.msg;
-    switch (msg) {
-        case 'ville':
-            res.send('Nous sommes à Paris');
-            return;
-
-        case 'météo':
-            res.send('Il fait beau');
-            return;
-
-        default:
-            res.send('Veuillez formuler votre requete dans le param msg: ville ou météo');
-            return;
-    }
-});
-
-app.listen(PORT, function () {
-    console.log('Chat-bot with mongo listening on port ' + PORT);
-});
-
-
 /** callback method
-client.connect(function(err, client) {
+ client.connect(function(err, client) {
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -46,22 +23,54 @@ client.connect(function(err, client) {
 });
  */
 
-/** async/await method */
+// Connect to mongo
 (async function() {
     try {
         await client.connect();
-        console.log("Connected correctly to server");
-
-        const db = client.db(dbName);
-        const datesCol = db.collection('dates');
-
-        await datesCol.insertOne({date: new Date()});
-        let dates = await datesCol.find().toArray();
-
-        console.log(dates);
+        console.log("Connected correctly to mongodb server");
     } catch (err) {
         console.log(err.stack);
     }
-
-    client.close();
 })();
+
+/** async/await method */
+async function setHistory(sender,msg) {
+    try {
+        const db = client.db(dbName);
+        const messagesCol = db.collection('messages');
+
+        await messagesCol.insertOne({from: sender,msg: msg});
+        //let messages = await messagesCol.find().toArray();
+        //console.log(messages);
+    } catch (err) {
+        console.log(err.stack);
+    }
+}
+
+app.post('/chat', function (req, res) {
+    let msg = req.body.msg;
+    let response = '';
+    switch (msg) {
+        case 'ville':
+            response = 'Nous sommes à Paris';
+            break;
+
+        case 'météo':
+            response = 'Il fait beau';
+            break;
+
+        default:
+            response = 'Veuillez formuler votre requete dans le param msg: ville ou météo';
+
+    }
+
+    (async () => {
+        await setHistory('user',msg);
+        await setHistory('bot',response);
+        res.send(response);
+    })();
+});
+
+app.listen(PORT, function () {
+    console.log('Chat-bot with mongo listening on port ' + PORT);
+});
