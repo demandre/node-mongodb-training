@@ -22,11 +22,10 @@ app.use(bodyParser.json());
         console.log(dates);
         client.close();
     });
-});
- */
+}); */
 
 // Connect to mongo
-(async function() {
+(async () => {
     try {
         await client.connect();
         console.log("Connected correctly to mongodb server");
@@ -48,7 +47,7 @@ async function setHistory(sender,msg) {
     }
 }
 
-app.post('/chat', function (req, res) {
+app.post('/chat', (req, res) => {
     let msg = req.body.msg;
     let response = '';
     switch (msg) {
@@ -78,6 +77,13 @@ app.get('/messages/all', (req, res) => {
     })();
 });
 
-app.listen(PORT, function () {
+app.delete('/messages/last', (req, res) => {
+    (async () => {
+        await messagesCol.deleteOne();
+        res.send('Ok, i have deleted that.');
+    })();
+});
+
+app.listen(PORT, () => {
     console.log('Chat-bot with mongo listening on port ' + PORT);
 });
