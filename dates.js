@@ -33,6 +33,8 @@ app.use(bodyParser.json());
         messagesCol = db.collection('messages');
     } catch (err) {
         console.log(err.stack);
+        client.close();
+        process.exit(1);
     }
 })();
 
@@ -40,8 +42,6 @@ app.use(bodyParser.json());
 async function setHistory(sender,msg) {
     try {
         await messagesCol.insertOne({from: sender,msg: msg});
-        //let messages = await messagesCol.find().toArray();
-        //console.log(messages);
     } catch (err) {
         console.log(err.stack);
     }
@@ -73,14 +73,24 @@ app.post('/chat', (req, res) => {
 
 app.get('/messages/all', (req, res) => {
     (async () => {
-        res.send(await messagesCol.find().toArray());
+        try {
+            res.send(await messagesCol.find().toArray());
+        } catch (err) {
+            console.log(err.stack);
+            res.send('an error occured');
+        }
     })();
 });
 
 app.delete('/messages/last', (req, res) => {
     (async () => {
-        await messagesCol.deleteOne();
-        res.send('Ok, i have deleted that.');
+        try {
+            await messagesCol.deleteOne();
+            res.send('Ok, i have deleted that.');
+        } catch (err) {
+            console.log(err.stack);
+            res.send('an error occured');
+        }
     })();
 });
 
