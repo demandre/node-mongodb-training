@@ -1,5 +1,7 @@
 const url = "mongodb://localhost:27017";
 const dbName = 'chat-bot';
+let db,messagesCol;
+
 const MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url);
 
@@ -28,6 +30,8 @@ app.use(bodyParser.json());
     try {
         await client.connect();
         console.log("Connected correctly to mongodb server");
+        db = client.db(dbName);
+        messagesCol = db.collection('messages');
     } catch (err) {
         console.log(err.stack);
     }
@@ -36,9 +40,6 @@ app.use(bodyParser.json());
 /** async/await method */
 async function setHistory(sender,msg) {
     try {
-        const db = client.db(dbName);
-        const messagesCol = db.collection('messages');
-
         await messagesCol.insertOne({from: sender,msg: msg});
         //let messages = await messagesCol.find().toArray();
         //console.log(messages);
@@ -68,6 +69,12 @@ app.post('/chat', function (req, res) {
         await setHistory('user',msg);
         await setHistory('bot',response);
         res.send(response);
+    })();
+});
+
+app.get('/messages/all', (req, res) => {
+    (async () => {
+        res.send(await messagesCol.find().toArray());
     })();
 });
 
